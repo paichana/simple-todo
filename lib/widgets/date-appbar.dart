@@ -1,14 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:async';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 
-class DateAppBar extends StatelessWidget {
-  const DateAppBar({
+class DateAppBar extends StatefulWidget {
+  final BuildContext context;
+  DateTime selectedDate;
+
+  DateAppBar({
     Key key,
     @required this.context,
-  }) : super(key: key);
+  }) : super(key: key) {
+    selectedDate = DateTime.now();
+  }
 
-  final BuildContext context;
+  @override
+  _DateAppBarState createState() => _DateAppBarState();
+}
+
+class _DateAppBarState extends State<DateAppBar> {
+  var dateFormatter = DateFormat('dd EEEE');
+  final timeFormat = DateFormat("HH:mm");
+
+  String dateString;
+
+  @override
+  void initState() {
+    super.initState();
+    dateString = dateFormatter.format(DateTime.now());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +66,9 @@ class DateAppBar extends StatelessWidget {
                   child: Container(
                     height: 40,
                     child: FloatingActionButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        _showDialog();
+                      },
                       backgroundColor: Theme.of(context).accentColor,
                       foregroundColor: Theme.of(context).primaryColorLight,
                       child: Text(
@@ -65,10 +86,52 @@ class DateAppBar extends StatelessWidget {
     );
   }
 
+  void _showDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Container(
+            child: Wrap(
+              children: <Widget>[
+                TextField(
+                  decoration: InputDecoration(hintText: "Shop grosseries"),
+                ),
+                DateTimeField(
+                  format: timeFormat,
+                  onShowPicker: (context, currentValue) async {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(
+                          currentValue ?? DateTime.now()),
+                    );
+                    return DateTimeField.convert(time);
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("ADD"),
+              onPressed: () {},
+            ),
+            FlatButton(
+              child: Text('CANCEL'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
   List<Widget> dateTitle(BuildContext context) {
     return <Widget>[
       Text(
-        "formattedDate",
+        dateString,
         style: TextStyle(
           fontWeight: FontWeight.w100,
           fontSize: 30,
@@ -76,7 +139,7 @@ class DateAppBar extends StatelessWidget {
         ),
       ),
       Text(
-        "8 OPEN TASKS",
+        '8 OPEN TASKS',
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
