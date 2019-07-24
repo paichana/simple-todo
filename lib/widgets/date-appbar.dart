@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:provider/provider.dart';
+import '../providers/tasks.dart';
 
 class DateAppBar extends StatefulWidget {
   final BuildContext context;
@@ -31,23 +33,17 @@ class _DateAppBarState extends State<DateAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final taskData = Provider.of<TasksProvider>(context);
+    final task = taskData.tasks;
+    final done = taskData.done;
+
+    final progress = done.length / (task.length + done.length);
+
     return AppBar(
+      backgroundColor: Theme.of(context).primaryColor,
       bottom: PreferredSize(
         preferredSize: Size.fromHeight(10.0),
-        child: Container(
-          height: 10,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              stops: [0, 1],
-              colors: [
-                Colors.red,
-                Colors.pinkAccent,
-              ],
-            ),
-          ),
-        ),
+        child: ProgressBar(progress),
       ),
       flexibleSpace: Container(
         child: Padding(
@@ -60,7 +56,24 @@ class _DateAppBarState extends State<DateAppBar> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: dateTitle(context),
+                  children: <Widget>[
+                    Text(
+                      dateString,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w100,
+                        fontSize: 30,
+                        color: Theme.of(context).primaryColorLight,
+                      ),
+                    ),
+                    Text(
+                      '${task.length} OPEN TASKS',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Theme.of(context).primaryColorLight,
+                      ),
+                    ),
+                  ],
                 ),
                 Center(
                   child: Container(
@@ -127,25 +140,21 @@ class _DateAppBarState extends State<DateAppBar> {
       },
     );
   }
+}
 
-  List<Widget> dateTitle(BuildContext context) {
-    return <Widget>[
-      Text(
-        dateString,
-        style: TextStyle(
-          fontWeight: FontWeight.w100,
-          fontSize: 30,
-          color: Theme.of(context).primaryColorLight,
-        ),
+class ProgressBar extends StatelessWidget {
+  final double progress;
+
+  ProgressBar(this.progress);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 10,
+      child: LinearProgressIndicator(
+        value: progress,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
-      Text(
-        '8 OPEN TASKS',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          color: Theme.of(context).primaryColorLight,
-        ),
-      ),
-    ];
+    );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/task.dart';
+import 'package:provider/provider.dart';
+import '../providers/tasks.dart';
 
 class TodoList extends StatefulWidget {
   @override
@@ -8,25 +9,12 @@ class TodoList extends StatefulWidget {
 
 class _TodoListState extends State<TodoList> {
   bool testBool = false;
-  var task = [
-    Task("Buy happiness", DateTime(2019, DateTime.november, 9, 13, 30)),
-    Task("Do homework", DateTime(2019, DateTime.november, 9, 9, 45)),
-    Task("Freelance work from John",
-        DateTime(2019, DateTime.november, 9, 10, 0)),
-    Task("Freelance work from Chris",
-        DateTime(2019, DateTime.november, 9, 11, 30)),
-    Task("Date with Jeniffer Lawrence",
-        DateTime(2019, DateTime.november, 10, 18, 0)),
-    Task("Buy Jordans", DateTime(2019, DateTime.november, 9, 19, 0)),
-    Task("Delete Photoshop", DateTime(2019, DateTime.november, 9, 20, 0)),
-    Task("Create TODO list", DateTime(2019, DateTime.november, 9, 21, 0)),
-    Task("Jog", DateTime(2019, DateTime.november, 9, 22, 0)),
-    Task("Buy KFC", DateTime(2019, DateTime.november, 9, 21, 0)),
-    Task("Sleep well", DateTime(2019, DateTime.november, 9, 5, 0))
-  ];
-  var done = <Task>[];
+
   @override
   Widget build(BuildContext context) {
+    final taskData = Provider.of<TasksProvider>(context);
+    final task = taskData.tasks;
+    final done = taskData.done;
     return Stack(
       children: <Widget>[
         Padding(
@@ -109,16 +97,10 @@ class _TodoListState extends State<TodoList> {
                         onChanged: (bool val) {
                           setState(() {
                             if (!isDone) {
-                              Task temp = task[i];
-                              task.removeAt(i);
-                              done.add(temp);
+                              taskData.taskDone(i);
                             } else {
-                              Task temp = done[j];
-                              done.removeAt(j);
-                              task.add(temp);
+                              taskData.taskUndone(i);
                             }
-                            task.sort(
-                                (a, b) => a.datetime.compareTo(b.datetime));
                           });
                         },
                       ),
