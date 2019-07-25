@@ -42,4 +42,24 @@ class TasksProvider with ChangeNotifier {
     _tasks.sort((a, b) => a.datetime.compareTo(b.datetime));
     notifyListeners();
   }
+
+  void addTask(Task t) {
+    _tasks.add(t);
+    notifyListeners();
+  }
+
+  void removeTask(Task t) {
+    _tasks.remove(t);
+    notifyListeners();
+  }
+
+  void removeTaskIndex(int i) {
+    if (i > _tasks.length - 1) {
+      _done.removeAt(i - _tasks.length);
+    } else {
+      _tasks.removeAt(i);
+    }
+
+    notifyListeners();
+  }
 }

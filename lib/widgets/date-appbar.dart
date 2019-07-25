@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/tasks.dart';
+import '../widgets/todo-dialog.dart';
+import '../widgets/progress-bar.dart';
 
 class DateAppBar extends StatefulWidget {
   final BuildContext context;
@@ -80,7 +82,7 @@ class _DateAppBarState extends State<DateAppBar> {
                     height: 40,
                     child: FloatingActionButton(
                       onPressed: () {
-                        _showDialog();
+                        _showDialog(taskData);
                       },
                       backgroundColor: Theme.of(context).accentColor,
                       foregroundColor: Theme.of(context).primaryColorLight,
@@ -99,62 +101,14 @@ class _DateAppBarState extends State<DateAppBar> {
     );
   }
 
-  void _showDialog() {
+  void _showDialog(TasksProvider taskData) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          content: Container(
-            child: Wrap(
-              children: <Widget>[
-                TextField(
-                  decoration: InputDecoration(hintText: "Shop grosseries"),
-                ),
-                DateTimeField(
-                  format: timeFormat,
-                  onShowPicker: (context, currentValue) async {
-                    final time = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.fromDateTime(
-                          currentValue ?? DateTime.now()),
-                    );
-                    return DateTimeField.convert(time);
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text("ADD"),
-              onPressed: () {},
-            ),
-            FlatButton(
-              child: Text('CANCEL'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            )
-          ],
-        );
+        var alertDialog =
+            new AddTodoDialog(timeFormat: timeFormat, taskData: taskData);
+        return alertDialog;
       },
-    );
-  }
-}
-
-class ProgressBar extends StatelessWidget {
-  final double progress;
-
-  ProgressBar(this.progress);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 10,
-      child: LinearProgressIndicator(
-        value: progress,
-        backgroundColor: Theme.of(context).primaryColor,
-      ),
     );
   }
 }

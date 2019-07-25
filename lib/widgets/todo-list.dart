@@ -36,76 +36,104 @@ class _TodoListState extends State<TodoList> {
               bool isDone = (i > task.length - 1);
               int j = i - task.length;
 
-              return Container(
-                margin: EdgeInsets.only(top: margin),
-                padding: EdgeInsets.all(20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(right: 20.0),
-                          child: CircleAvatar(
-                            radius: 5.0,
-                            backgroundColor: isDone
-                                ? Theme.of(context).unselectedWidgetColor
-                                : Theme.of(context).accentColor,
-                          ),
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              isDone
-                                  ? '${done[j].datetime.hour.toString().padLeft(2, '0')}:${done[j].datetime.minute.toString().padLeft(2, '0')}'
-                                  : '${task[i].datetime.hour.toString().padLeft(2, '0')}:${task[i].datetime.minute.toString().padLeft(2, '0')}',
-                              style: TextStyle(
-                                color: isDone
-                                    ? Theme.of(context).unselectedWidgetColor
-                                    : Theme.of(context).primaryColorLight,
-                                fontSize: 10.0,
-                              ),
+              return Dismissible(
+                direction: DismissDirection.horizontal,
+                key: Key(
+                    '${i.toString()}${isDone ? done[j].info : task[i].info}${isDone ? done[j].datetime.toString() : task[i].datetime.toString()}'),
+                onDismissed: (direction) {
+                  taskData.removeTaskIndex(i);
+                },
+                background: Container(
+                  decoration: BoxDecoration(
+                    // Box decoration takes a gradient
+                    gradient: LinearGradient(
+                      // Where the linear gradient begins and ends
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      // Add one stop for each color. Stops should increase from 0 to 1
+                      stops: [0.1, 0.5, 0.7, 0.9],
+                      colors: [
+                        // Colors are easy thanks to Flutter's Colors class.
+                        Colors.red[900],
+                        Colors.red[600],
+                        Colors.red[300],
+                        Colors.red[0],
+                      ],
+                    ),
+                  ),
+                ),
+                child: Container(
+                  margin: EdgeInsets.only(top: margin),
+                  padding: EdgeInsets.all(20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(right: 20.0),
+                            child: CircleAvatar(
+                              radius: 5.0,
+                              backgroundColor: isDone
+                                  ? Theme.of(context).unselectedWidgetColor
+                                  : Theme.of(context).accentColor,
                             ),
-                            Text(
-                              isDone
-                                  ? done[j].info.toString()
-                                  : task[i].info.toString(),
-                              style: TextStyle(
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                isDone
+                                    ? '${done[j].datetime.hour.toString().padLeft(2, '0')}:${done[j].datetime.minute.toString().padLeft(2, '0')}'
+                                    : '${task[i].datetime.hour.toString().padLeft(2, '0')}:${task[i].datetime.minute.toString().padLeft(2, '0')}',
+                                style: TextStyle(
                                   color: isDone
                                       ? Theme.of(context).unselectedWidgetColor
                                       : Theme.of(context).primaryColorLight,
-                                  fontSize: 20.0),
-                            ),
-                          ],
+                                  fontSize: 10.0,
+                                ),
+                              ),
+                              Text(
+                                isDone
+                                    ? done[j].info.toString()
+                                    : task[i].info.toString(),
+                                style: TextStyle(
+                                    color: isDone
+                                        ? Theme.of(context)
+                                            .unselectedWidgetColor
+                                        : Theme.of(context).primaryColorLight,
+                                    fontSize: 20.0),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Container(
+                        width: 50,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(1000),
+                          color: Theme.of(context).unselectedWidgetColor,
                         ),
-                      ],
-                    ),
-                    Container(
-                      width: 50,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.circular(1000),
-                        color: Theme.of(context).unselectedWidgetColor,
+                        child: Checkbox(
+                          activeColor: Theme.of(context).unselectedWidgetColor,
+                          checkColor: Theme.of(context).primaryColorDark,
+                          value: isDone,
+                          onChanged: (bool val) {
+                            setState(() {
+                              if (!isDone) {
+                                taskData.taskDone(i);
+                              } else {
+                                taskData.taskUndone(i);
+                              }
+                            });
+                          },
+                        ),
                       ),
-                      child: Checkbox(
-                        activeColor: Theme.of(context).unselectedWidgetColor,
-                        checkColor: Theme.of(context).primaryColorDark,
-                        value: isDone,
-                        onChanged: (bool val) {
-                          setState(() {
-                            if (!isDone) {
-                              taskData.taskDone(i);
-                            } else {
-                              taskData.taskUndone(i);
-                            }
-                          });
-                        },
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             }),
