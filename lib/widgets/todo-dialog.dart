@@ -5,7 +5,7 @@ import 'package:simple_todo/models/task.dart';
 
 import '../providers/tasks.dart';
 
-class AddTodoDialog extends StatelessWidget {
+class AddTodoDialog extends StatefulWidget {
   const AddTodoDialog({
     Key key,
     @required this.timeFormat,
@@ -16,8 +16,14 @@ class AddTodoDialog extends StatelessWidget {
   final TasksProvider taskData;
 
   @override
+  _AddTodoDialogState createState() => _AddTodoDialogState();
+}
+
+class _AddTodoDialogState extends State<AddTodoDialog> {
+  @override
   Widget build(BuildContext context) {
-    final nameController = TextEditingController();
+    final infoController = TextEditingController();
+    final dateTimeController = TextEditingController();
 
     var selectedDate = DateTime.now();
     return AlertDialog(
@@ -25,24 +31,20 @@ class AddTodoDialog extends StatelessWidget {
         child: Wrap(
           children: <Widget>[
             TextField(
-              controller: nameController,
+              controller: infoController,
               decoration: InputDecoration(hintText: "Shop grosseries"),
             ),
             DateTimeField(
-              format: timeFormat,
+              format: widget.timeFormat,
+              controller: dateTimeController,
               onShowPicker: (context, currentValue) async {
                 final time = await showTimePicker(
                   context: context,
                   initialTime:
                       TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
                 );
+
                 return DateTimeField.convert(time);
-              },
-              onSaved: (dt) {
-                if (dt != null) {
-                  selectedDate =
-                      DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute);
-                }
               },
             ),
           ],
@@ -58,7 +60,8 @@ class AddTodoDialog extends StatelessWidget {
         FlatButton(
           child: Text("ADD"),
           onPressed: () {
-            taskData.addTask(Task(nameController.text, selectedDate));
+            widget.taskData.addTask(Task(
+                infoController.text, DateTime.parse(dateTimeController.text)));
             Navigator.of(context).pop();
           },
         ),

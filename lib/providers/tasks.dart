@@ -1,24 +1,47 @@
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
 import '../models/task.dart';
 
 class TasksProvider with ChangeNotifier {
-  List<Task> _tasks = [
-    Task("Buy happiness", DateTime(2019, DateTime.november, 9, 13, 30)),
-    Task("Do homework", DateTime(2019, DateTime.november, 9, 9, 45)),
-    Task("Freelance work from John",
-        DateTime(2019, DateTime.november, 9, 10, 0)),
-    Task("Freelance work from Chris",
-        DateTime(2019, DateTime.november, 9, 11, 30)),
-    Task("Date with Jeniffer Lawrence",
-        DateTime(2019, DateTime.november, 10, 18, 0)),
-    Task("Buy Jordans", DateTime(2019, DateTime.november, 9, 19, 0)),
-    Task("Delete Photoshop", DateTime(2019, DateTime.november, 9, 20, 0)),
-    Task("Create TODO list", DateTime(2019, DateTime.november, 9, 21, 0)),
-    Task("Jog", DateTime(2019, DateTime.november, 9, 22, 0)),
-    Task("Buy KFC", DateTime(2019, DateTime.november, 9, 21, 0)),
-    Task("Sleep well", DateTime(2019, DateTime.november, 9, 5, 0))
-  ];
+  List<Task> _tasks = [];
   List<Task> _done = [];
+
+  loadTask() async {
+    await SharedPreferences.getInstance().then((prefs) {
+      List<String> pdone = prefs.getStringList("done") ?? [];
+
+      if (pdone.length > 0) {
+        _done = pdone.map((t) {
+          Map<String, dynamic> jsonDone = jsonDecode(t);
+          return Task(jsonDone["info"], DateTime.parse(jsonDone["datetime"]));
+        }).toList();
+      } else {
+        _done = [];
+      }
+
+      List<String> ptask = prefs.getStringList("tasks") ?? [];
+
+      if (ptask.length > 0) {
+        _tasks = ptask.map((t) {
+          Map<String, dynamic> jsonDone = jsonDecode(t);
+          return Task(jsonDone["info"], DateTime.parse(jsonDone["datetime"]));
+        }).toList();
+      } else {
+        _tasks = [];
+      }
+    });
+    notifyListeners();
+  }
+
+  saveTask() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setStringList(
+        "done", _done.map((t) => t.itemToJsonString()).toList());
+    prefs.setStringList(
+        "tasks", _tasks.map((t) => t.itemToJsonString()).toList());
+  }
 
   List<Task> get tasks {
     return [..._tasks];
@@ -33,6 +56,7 @@ class TasksProvider with ChangeNotifier {
     _tasks.removeAt(i);
     _done.add(temp);
     notifyListeners();
+    saveTask();
   }
 
   void taskUndone(int i) {
@@ -41,16 +65,19 @@ class TasksProvider with ChangeNotifier {
     _tasks.add(temp);
     _tasks.sort((a, b) => a.datetime.compareTo(b.datetime));
     notifyListeners();
+    saveTask();
   }
 
   void addTask(Task t) {
     _tasks.add(t);
     notifyListeners();
+    saveTask();
   }
 
   void removeTask(Task t) {
     _tasks.remove(t);
     notifyListeners();
+    saveTask();
   }
 
   void removeTaskIndex(int i) {
@@ -61,5 +88,6 @@ class TasksProvider with ChangeNotifier {
     }
 
     notifyListeners();
+    saveTask();
   }
 }

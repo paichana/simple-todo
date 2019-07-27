@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import '../models/task.dart';
 
 import '../providers/tasks.dart';
-import '../widgets/todo-dialog.dart';
 import '../widgets/progress-bar.dart';
 
 class DateAppBar extends StatefulWidget {
   final BuildContext context;
-  DateTime selectedDate;
 
   DateAppBar({
     Key key,
     @required this.context,
-  }) : super(key: key) {
-    selectedDate = DateTime.now();
-  }
+  }) : super(key: key);
 
   @override
   _DateAppBarState createState() => _DateAppBarState();
@@ -24,6 +22,8 @@ class DateAppBar extends StatefulWidget {
 class _DateAppBarState extends State<DateAppBar> {
   var dateFormatter = DateFormat('dd EEEE');
   final timeFormat = DateFormat("HH:mm");
+  final infoController = TextEditingController();
+  final datetimeController = TextEditingController();
 
   String dateString;
 
@@ -39,7 +39,9 @@ class _DateAppBarState extends State<DateAppBar> {
     final task = taskData.tasks;
     final done = taskData.done;
 
-    final progress = done.length / (task.length + done.length);
+    final progress = (done.length + task.length > 0)
+        ? done.length / (task.length + done.length)
+        : 0.0;
 
     return AppBar(
       backgroundColor: Theme.of(context).primaryColor,
@@ -81,8 +83,8 @@ class _DateAppBarState extends State<DateAppBar> {
                   child: Container(
                     height: 40,
                     child: FloatingActionButton(
-                      onPressed: () {
-                        _showDialog(taskData);
+                      onPressed: () async {
+                        await buildShowBottomSheet(context, taskData);
                       },
                       backgroundColor: Theme.of(context).accentColor,
                       foregroundColor: Theme.of(context).primaryColorLight,
@@ -101,14 +103,50 @@ class _DateAppBarState extends State<DateAppBar> {
     );
   }
 
-  void _showDialog(TasksProvider taskData) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        var alertDialog =
-            new AddTodoDialog(timeFormat: timeFormat, taskData: taskData);
-        return alertDialog;
-      },
-    );
+  DateTime selectedTime;
+  Future<PersistentBottomSheetController> buildShowBottomSheet(
+      BuildContext context, TasksProvider tp) async {
+    return showBottomSheet(
+        context: context,
+        builder: (context) {
+          return Container(
+            height: 300,
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  controller: infoController,
+                  decoration: InputDecoration(hintText: "Go shopping...."),
+                ),
+                DateTimeField(
+                  format: timeFormat,
+                  onShowPicker: (context, currentValue) async {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(
+                          currentValue ?? DateTime.now()),
+                    );
+
+                    return DateTimeField.convert(time);
+                  },
+                  onFieldSubmitted: (time) {
+                    selectedTime = time;
+                  },
+                ),
+                FlatButton(
+                  color: Colors.blue,
+                  onPressed: () {
+                    tp.addTask(Task(
+                        infoController.text, selectedTime ?? DateTime.now()));
+                    infoController.clear();
+
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("TEST"),
+                ),
+              ],
+            ),
+            color: Colors.red,
+          );
+        });
   }
 }

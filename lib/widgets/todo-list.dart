@@ -115,10 +115,6 @@ class _TodoListState extends State<TodoList> {
                             value: isDone,
                             onChanged: (bool val) {
                               setState(() {
-                                print('J = $j');
-                                print('I = $i');
-
-                                print('isDone = $isDone');
                                 if (!isDone) {
                                   taskData.taskDone(i);
                                 } else {
