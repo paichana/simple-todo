@@ -25,109 +25,115 @@ class _TodoListState extends State<TodoList> {
             color: Theme.of(context).primaryColorLight,
           ),
         ),
-        ListView.builder(
-            itemCount: task.length + done.length,
-            itemBuilder: (context, i) {
-              double margin = 0;
-              if (i == 0) {
-                margin = 35;
-              }
+        Padding(
+          padding: const EdgeInsets.only(top: 35),
+          child: ListView.builder(
+              itemCount: task.length + done.length,
+              itemBuilder: (context, i) {
+                double margin = 0;
 
-              bool isDone = (i > task.length - 1);
-              int j = i - task.length;
+                bool isDone = (i > task.length - 1);
+                int j = i - task.length;
 
-              return Dismissible(
-                direction: DismissDirection.horizontal,
-                key: Key(
-                    '${i.toString()}${isDone ? done[j].info : task[i].info}${isDone ? done[j].datetime.toString() : task[i].datetime.toString()}'),
-                onDismissed: (direction) {
-                  taskData.removeTaskIndex(i);
-                },
-                background: Container(
-                  color: Theme.of(context).primaryColor,
-                  child: Center(
-                    child: Icon(
-                      Icons.delete,
-                      size: 70,
-                      color: Theme.of(context).accentColor,
+                return Dismissible(
+                  direction: DismissDirection.horizontal,
+                  key: Key(
+                      '${i.toString()}${isDone ? done[j].info : task[i].info}${isDone ? done[j].datetime.toString() : task[i].datetime.toString()}'),
+                  onDismissed: (direction) {
+                    taskData.removeTaskIndex(i);
+                  },
+                  background: Container(
+                    color: Theme.of(context).primaryColor,
+                    child: Center(
+                      child: Icon(
+                        Icons.delete,
+                        size: 70,
+                        color: Theme.of(context).accentColor,
+                      ),
                     ),
                   ),
-                ),
-                child: Container(
-                  margin: EdgeInsets.only(top: margin),
-                  padding: EdgeInsets.all(20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(right: 20.0),
-                            child: CircleAvatar(
-                              radius: 5.0,
-                              backgroundColor: isDone
-                                  ? Theme.of(context).unselectedWidgetColor
-                                  : Theme.of(context).accentColor,
-                            ),
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                isDone
-                                    ? '${done[j].datetime.hour.toString().padLeft(2, '0')}:${done[j].datetime.minute.toString().padLeft(2, '0')}'
-                                    : '${task[i].datetime.hour.toString().padLeft(2, '0')}:${task[i].datetime.minute.toString().padLeft(2, '0')}',
-                                style: TextStyle(
-                                  color: isDone
-                                      ? Theme.of(context).unselectedWidgetColor
-                                      : Theme.of(context).primaryColorLight,
-                                  fontSize: 10.0,
-                                ),
+                  child: Container(
+                    margin: EdgeInsets.only(top: margin),
+                    padding: EdgeInsets.all(20.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 20.0),
+                              child: CircleAvatar(
+                                radius: 5.0,
+                                backgroundColor: isDone
+                                    ? Theme.of(context).unselectedWidgetColor
+                                    : Theme.of(context).accentColor,
                               ),
-                              Text(
-                                isDone
-                                    ? done[j].info.toString()
-                                    : task[i].info.toString(),
-                                style: TextStyle(
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  isDone
+                                      ? '${done[j].datetime.hour.toString().padLeft(2, '0')}:${done[j].datetime.minute.toString().padLeft(2, '0')}'
+                                      : '${task[i].datetime.hour.toString().padLeft(2, '0')}:${task[i].datetime.minute.toString().padLeft(2, '0')}',
+                                  style: TextStyle(
                                     color: isDone
                                         ? Theme.of(context)
                                             .unselectedWidgetColor
                                         : Theme.of(context).primaryColorLight,
-                                    fontSize: 20.0),
-                              ),
-                            ],
+                                    fontSize: 10.0,
+                                  ),
+                                ),
+                                Text(
+                                  isDone
+                                      ? done[j].info.toString()
+                                      : task[i].info.toString(),
+                                  style: TextStyle(
+                                      color: isDone
+                                          ? Theme.of(context)
+                                              .unselectedWidgetColor
+                                          : Theme.of(context).primaryColorLight,
+                                      fontSize: 20.0),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Container(
+                          width: 50,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(1000),
+                            color: Theme.of(context).unselectedWidgetColor,
                           ),
-                        ],
-                      ),
-                      Container(
-                        width: 50,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.circular(1000),
-                          color: Theme.of(context).unselectedWidgetColor,
+                          child: Checkbox(
+                            activeColor:
+                                Theme.of(context).unselectedWidgetColor,
+                            checkColor: Theme.of(context).primaryColorDark,
+                            value: isDone,
+                            onChanged: (bool val) {
+                              setState(() {
+                                print('J = $j');
+                                print('I = $i');
+
+                                print('isDone = $isDone');
+                                if (!isDone) {
+                                  taskData.taskDone(i);
+                                } else {
+                                  taskData.taskUndone(j);
+                                }
+                              });
+                            },
+                          ),
                         ),
-                        child: Checkbox(
-                          activeColor: Theme.of(context).unselectedWidgetColor,
-                          checkColor: Theme.of(context).primaryColorDark,
-                          value: isDone,
-                          onChanged: (bool val) {
-                            setState(() {
-                              if (!isDone) {
-                                taskData.taskDone(i);
-                              } else {
-                                taskData.taskUndone(i);
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
+        ),
       ],
     );
   }
