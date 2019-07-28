@@ -110,42 +110,64 @@ class _DateAppBarState extends State<DateAppBar> {
         context: context,
         builder: (context) {
           return Container(
-            height: 300,
-            child: Column(
-              children: <Widget>[
-                TextField(
-                  controller: infoController,
-                  decoration: InputDecoration(hintText: "Go shopping...."),
-                ),
-                DateTimeField(
-                  format: timeFormat,
-                  onShowPicker: (context, currentValue) async {
-                    final time = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.fromDateTime(
-                          currentValue ?? DateTime.now()),
-                    );
+            color: Theme.of(context).unselectedWidgetColor,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+              child: Container(
+                height: 300,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      TextField(
+                        autocorrect: true,
+                        autofocus: true,
+                        controller: infoController,
+                        decoration: InputDecoration(
+                            hintText: "Go shopping....",
+                            labelText: "TODOs",
+                            hintStyle: TextStyle(fontSize: 20),
+                            labelStyle: TextStyle(fontSize: 20)),
+                      ),
+                      DateTimeField(
+                        format: timeFormat,
+                        decoration: InputDecoration(
+                          labelText: "TIME",
+                          labelStyle: TextStyle(fontSize: 20),
+                          hintStyle: TextStyle(fontSize: 20),
+                        ),
+                        onShowPicker: (context, currentValue) async {
+                          final time = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.fromDateTime(
+                                currentValue ?? DateTime.now()),
+                          );
 
-                    return DateTimeField.convert(time);
-                  },
-                  onFieldSubmitted: (time) {
-                    selectedTime = time;
-                  },
-                ),
-                FlatButton(
-                  color: Colors.blue,
-                  onPressed: () {
-                    tp.addTask(Task(
-                        infoController.text, selectedTime ?? DateTime.now()));
-                    infoController.clear();
+                          return DateTimeField.convert(time);
+                        },
+                        onFieldSubmitted: (time) {
+                          selectedTime = time;
+                        },
+                      ),
+                      RaisedButton(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        color: Theme.of(context).accentColor,
+                        onPressed: () {
+                          tp.addTask(Task(infoController.text,
+                              selectedTime ?? DateTime.now()));
+                          infoController.clear();
 
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("TEST"),
+                          Navigator.of(context).pop();
+                        },
+                        child: Text("ADD"),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
-            color: Colors.red,
           );
         });
   }
