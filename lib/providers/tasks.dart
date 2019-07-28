@@ -7,6 +7,11 @@ import '../models/task.dart';
 class TasksProvider with ChangeNotifier {
   List<Task> _tasks = [];
   List<Task> _done = [];
+  DateTime currentDate;
+
+  TasksProvider() {
+    currentDate = DateTime.now();
+  }
 
   loadTask() async {
     await SharedPreferences.getInstance().then((prefs) {

@@ -9,10 +9,12 @@ import '../widgets/progress-bar.dart';
 
 class DateAppBar extends StatefulWidget {
   final BuildContext context;
+  final DateTime currentDate;
 
   DateAppBar({
     Key key,
     @required this.context,
+    @required this.currentDate,
   }) : super(key: key);
 
   @override
@@ -21,17 +23,11 @@ class DateAppBar extends StatefulWidget {
 
 class _DateAppBarState extends State<DateAppBar> {
   var dateFormatter = DateFormat('dd EEEE');
+  var dateFormatter2 = DateFormat('MMMM y');
+
   final timeFormat = DateFormat("HH:mm");
   final infoController = TextEditingController();
   final datetimeController = TextEditingController();
-
-  String dateString;
-
-  @override
-  void initState() {
-    super.initState();
-    dateString = dateFormatter.format(DateTime.now());
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,20 +58,36 @@ class _DateAppBarState extends State<DateAppBar> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      dateString,
+                      dateFormatter.format(widget.currentDate),
                       style: TextStyle(
                         fontWeight: FontWeight.w100,
                         fontSize: 30,
                         color: Theme.of(context).primaryColorLight,
                       ),
                     ),
-                    Text(
-                      '${task.length} OPEN TASKS',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Theme.of(context).primaryColorLight,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Text(
+                          '${dateFormatter2.format(widget.currentDate)}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: Theme.of(context).primaryColorLight,
+                          ),
+                        ),
+                        Container(
+                          width: 20,
+                        ),
+                        Text(
+                          '${task.length} OPEN TASKS',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: Theme.of(context).accentColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

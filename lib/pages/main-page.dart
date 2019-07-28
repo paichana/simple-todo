@@ -12,27 +12,36 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   final taskProvider = TasksProvider();
+  final pageController = PageController(initialPage: 300);
+
   @override
   void initState() {
     taskProvider.loadTask();
-
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      builder: (ctx) => taskProvider,
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(100.0),
-          child: new DateAppBar(context: context),
-        ),
-        body: Container(
-          color: Theme.of(context).primaryColorDark,
-          child: TodoList(),
-        ),
-      ),
-    );
+        builder: (ctx) => taskProvider,
+        child: PageView.builder(
+          controller: pageController,
+          itemBuilder: (context, i) {
+            i = i - 300;
+            return Scaffold(
+              appBar: PreferredSize(
+                preferredSize: Size.fromHeight(100.0),
+                child: DateAppBar(
+                  context: context,
+                  currentDate: taskProvider.currentDate.add(Duration(days: i)),
+                ),
+              ),
+              body: Container(
+                color: Theme.of(context).primaryColorDark,
+                child: TodoList(),
+              ),
+            );
+          },
+        ));
   }
 }
