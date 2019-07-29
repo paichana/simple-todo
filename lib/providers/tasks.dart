@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -7,92 +8,146 @@ import '../models/task.dart';
 class TasksProvider with ChangeNotifier {
   List<Task> _tasks = [];
   List<Task> _done = [];
+  Map<String, TodoList> td = Map();
+
+  DateFormat keyFormatter = DateFormat("yMd");
+
   DateTime currentDate;
 
   TasksProvider() {
     currentDate = DateTime.now();
   }
 
-  loadTask() async {
+  loadTask(DateTime dt) async {
+    String key = keyFormatter.format(dt);
+
+    if (td.containsKey(key)) {
+      _tasks = td[key].tasks;
+      _done = td[key].done;
+      return;
+    }
+
+    TodoList temptd = TodoList();
     await SharedPreferences.getInstance().then((prefs) {
-      List<String> pdone = prefs.getStringList("done") ?? [];
+      List<String> pdone = prefs.getStringList('done_${key}') ?? [];
 
       if (pdone.length > 0) {
-        _done = pdone.map((t) {
+        temptd.done = pdone.map((t) {
           Map<String, dynamic> jsonDone = jsonDecode(t);
           return Task(jsonDone["info"], DateTime.parse(jsonDone["datetime"]));
         }).toList();
       } else {
-        _done = [];
+        temptd.done = [];
       }
 
       List<String> ptask = prefs.getStringList("tasks") ?? [];
 
       if (ptask.length > 0) {
-        _tasks = ptask.map((t) {
+        temptd.tasks = ptask.map((t) {
           Map<String, dynamic> jsonDone = jsonDecode(t);
           return Task(jsonDone["info"], DateTime.parse(jsonDone["datetime"]));
         }).toList();
       } else {
-        _tasks = [];
+        temptd.tasks = [];
       }
     });
+
+    td[key] = temptd;
     notifyListeners();
   }
 
-  saveTask() async {
+  saveTask(DateTime dt) async {
+    String key = keyFormatter.format(dt);
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setStringList(
-        "done", _done.map((t) => t.itemToJsonString()).toList());
+        'done_$key', td[key].done.map((t) => t.itemToJsonString()).toList());
     prefs.setStringList(
-        "tasks", _tasks.map((t) => t.itemToJsonString()).toList());
+        'tasks_$key', td[key].tasks.map((t) => t.itemToJsonString()).toList());
   }
 
-  List<Task> get tasks {
-    return [..._tasks];
-  }
-
-  List<Task> get done {
-    return [..._done];
-  }
-
-  void taskDone(int i) {
-    Task temp = _tasks[i];
-    _tasks.removeAt(i);
-    _done.add(temp);
-    notifyListeners();
-    saveTask();
-  }
-
-  void taskUndone(int i) {
-    Task temp = _done[i];
-    _done.removeAt(i);
-    _tasks.add(temp);
-    _tasks.sort((a, b) => a.datetime.compareTo(b.datetime));
-    notifyListeners();
-    saveTask();
-  }
-
-  void addTask(Task t) {
-    _tasks.add(t);
-    notifyListeners();
-    saveTask();
-  }
-
-  void removeTask(Task t) {
-    _tasks.remove(t);
-    notifyListeners();
-    saveTask();
-  }
-
-  void removeTaskIndex(int i) {
-    if (i > _tasks.length - 1) {
-      _done.removeAt(i - _tasks.length);
+  List<Task> getTasks(DateTime dt) {
+    String key = keyFormatter.format(dt);
+    if (td.containsKey(key)) {
+      return td[key].tasks;
     } else {
-      _tasks.removeAt(i);
+      td[key] = TodoList();
+      return td[key].tasks;
+    }
+  }
+
+  List<Task> getDone(DateTime dt) {
+    String key = keyFormatter.format(dt);
+    if (td.containsKey(key)) {
+      return td[key].done;
+    } else {
+      td[key] = TodoList();
+      return td[key].done;
+    }
+  }
+
+  void taskDone(DateTime dt, int i) {
+    String key = keyFormatter.format(dt);
+    if (!td.containsKey(key)) {
+      return;
+    }
+
+    Task temp = td[key].tasks[i];
+    td[key].tasks.removeAt(i);
+    td[key].done.add(temp);
+    notifyListeners();
+    saveTask(dt);
+  }
+
+  void taskUndone(DateTime dt, int i) {
+    String key = keyFormatter.format(dt);
+    if (!td.containsKey(key)) {
+      return;
+    }
+    Task temp = td[key].done[i];
+    td[key].done.removeAt(i);
+    td[key].tasks.add(temp);
+
+    td[key].tasks.sort((a, b) => a.datetime.compareTo(b.datetime));
+    notifyListeners();
+    saveTask(dt);
+  }
+
+  void addTask(DateTime dt, Task t) {
+    String key = keyFormatter.format(dt);
+
+    if (!td.containsKey(key)) {
+      td[key] = TodoList();
+    }
+    td[key].tasks.add(t);
+    notifyListeners();
+    saveTask(dt);
+  }
+
+  void removeTask(DateTime dt, Task t) {
+    String key = keyFormatter.format(dt);
+
+    if (!td.containsKey(key)) {
+      return;
+    }
+    td[key].tasks.remove(t);
+    notifyListeners();
+    saveTask(dt);
+  }
+
+  void removeTaskIndex(DateTime dt, int i) {
+    String key = keyFormatter.format(dt);
+    if (!td.containsKey(key)) {
+      return;
+    }
+
+    if (i > _tasks.length - 1) {
+      td[dt].done.removeAt(i - _tasks.length);
+    } else {
+      td[dt].tasks.removeAt(i);
     }
 
     notifyListeners();
-    saveTask();
+    saveTask(dt);
   }
 }

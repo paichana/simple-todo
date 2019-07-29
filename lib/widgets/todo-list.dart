@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/tasks.dart';
 
 class TodoList extends StatefulWidget {
+  TodoList(this.currentDate);
+  final DateTime currentDate;
   @override
   _TodoListState createState() => _TodoListState();
 }
@@ -13,8 +15,8 @@ class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     final taskData = Provider.of<TasksProvider>(context);
-    final task = taskData.tasks;
-    final done = taskData.done;
+    final task = taskData.getTasks(widget.currentDate);
+    final done = taskData.getDone(widget.currentDate);
     return Stack(
       children: <Widget>[
         Padding(
@@ -40,7 +42,7 @@ class _TodoListState extends State<TodoList> {
                   key: Key(
                       '${i.toString()}${isDone ? done[j].info : task[i].info}${isDone ? done[j].datetime.toString() : task[i].datetime.toString()}'),
                   onDismissed: (direction) {
-                    taskData.removeTaskIndex(i);
+                    taskData.removeTaskIndex(widget.currentDate, i);
                   },
                   background: Container(
                     color: Theme.of(context).primaryColor,
@@ -116,9 +118,9 @@ class _TodoListState extends State<TodoList> {
                             onChanged: (bool val) {
                               setState(() {
                                 if (!isDone) {
-                                  taskData.taskDone(i);
+                                  taskData.taskDone(widget.currentDate, i);
                                 } else {
-                                  taskData.taskUndone(j);
+                                  taskData.taskUndone(widget.currentDate, j);
                                 }
                               });
                             },

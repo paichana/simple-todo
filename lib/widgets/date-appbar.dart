@@ -32,8 +32,8 @@ class _DateAppBarState extends State<DateAppBar> {
   @override
   Widget build(BuildContext context) {
     final taskData = Provider.of<TasksProvider>(context);
-    final task = taskData.tasks;
-    final done = taskData.done;
+    final task = taskData.getTasks(widget.currentDate);
+    final done = taskData.getDone(widget.currentDate);
 
     final progress = (done.length + task.length > 0)
         ? done.length / (task.length + done.length)
@@ -167,8 +167,10 @@ class _DateAppBarState extends State<DateAppBar> {
                         ),
                         color: Theme.of(context).accentColor,
                         onPressed: () {
-                          tp.addTask(Task(infoController.text,
-                              selectedTime ?? DateTime.now()));
+                          tp.addTask(
+                              widget.currentDate,
+                              Task(infoController.text,
+                                  selectedTime ?? DateTime.now()));
                           infoController.clear();
 
                           Navigator.of(context).pop();

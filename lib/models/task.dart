@@ -24,3 +24,8 @@ class Task {
     return json;
   }
 }
+
+class TodoList {
+  List<Task> done = [];
+  List<Task> tasks = [];
+}

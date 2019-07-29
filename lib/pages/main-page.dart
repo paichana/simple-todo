@@ -16,7 +16,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   void initState() {
-    taskProvider.loadTask();
+    taskProvider.loadTask(DateTime.now());
     super.initState();
   }
 
@@ -28,17 +28,19 @@ class _MainPageState extends State<MainPage> {
           controller: pageController,
           itemBuilder: (context, i) {
             i = i - 300;
+            DateTime currentDay =
+                taskProvider.currentDate.add(Duration(days: i));
             return Scaffold(
               appBar: PreferredSize(
                 preferredSize: Size.fromHeight(100.0),
                 child: DateAppBar(
                   context: context,
-                  currentDate: taskProvider.currentDate.add(Duration(days: i)),
+                  currentDate: currentDay,
                 ),
               ),
               body: Container(
                 color: Theme.of(context).primaryColorDark,
-                child: TodoList(),
+                child: TodoList(currentDay),
               ),
             );
           },
