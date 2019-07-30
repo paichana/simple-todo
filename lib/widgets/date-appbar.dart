@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import '../models/task.dart';
 
 import '../providers/tasks.dart';
@@ -115,7 +114,6 @@ class _DateAppBarState extends State<DateAppBar> {
     );
   }
 
-  DateTime selectedTime;
   Future<PersistentBottomSheetController> buildShowBottomSheet(
       BuildContext context, TasksProvider tp) async {
     return showBottomSheet(
@@ -141,41 +139,31 @@ class _DateAppBarState extends State<DateAppBar> {
                             hintStyle: TextStyle(fontSize: 20),
                             labelStyle: TextStyle(fontSize: 20)),
                       ),
-                      DateTimeField(
-                        format: timeFormat,
-                        decoration: InputDecoration(
-                          labelText: "TIME",
-                          labelStyle: TextStyle(fontSize: 20),
-                          hintStyle: TextStyle(fontSize: 20),
-                        ),
-                        onShowPicker: (context, currentValue) async {
-                          final time = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.fromDateTime(
-                                currentValue ?? DateTime.now()),
-                          );
-
-                          return DateTimeField.convert(time);
-                        },
-                        onFieldSubmitted: (time) {
-                          selectedTime = time;
-                        },
-                      ),
                       RaisedButton(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20.0),
                         ),
                         color: Theme.of(context).accentColor,
-                        onPressed: () {
-                          tp.addTask(
-                              widget.currentDate,
-                              Task(infoController.text,
-                                  selectedTime ?? DateTime.now()));
-                          infoController.clear();
+                        child: Text('TIME DUE'),
+                        onPressed: () async {
+                          var tod = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.now(),
+                          );
 
+                          DateTime c = DateTime(
+                            widget.currentDate.year,
+                            widget.currentDate.month,
+                            widget.currentDate.day,
+                            tod.hour,
+                            tod.minute,
+                          );
+
+                          tp.addTask(
+                              widget.currentDate, Task(infoController.text, c));
+                          infoController.clear();
                           Navigator.of(context).pop();
                         },
-                        child: Text("ADD"),
                       ),
                     ],
                   ),
